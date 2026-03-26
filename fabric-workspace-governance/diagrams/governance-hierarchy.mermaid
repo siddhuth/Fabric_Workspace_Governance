@@ -1,0 +1,58 @@
+graph TD
+    subgraph Tenant["Fabric Tenant"]
+        AP["Admin Portal<br/>Tenant Settings"]
+
+        subgraph Capacities["Capacities (Azure Resources)"]
+            CD["capacity-dev<br/>F2"]
+            CT["capacity-test<br/>F4"]
+            CP["capacity-prod<br/>F64"]
+        end
+
+        subgraph Domains["Domains (Metadata Construct)"]
+            D1["Finance"]
+            D2["Marketing"]
+            D3["Engineering"]
+
+            D1 --> SD1A["Accounting"]
+            D1 --> SD1B["FP&A"]
+            D2 --> SD2A["Campaign Analytics"]
+            D2 --> SD2B["Digital"]
+            D3 --> SD3A["Data Platform"]
+            D3 --> SD3B["MLOps"]
+        end
+
+        subgraph Workspaces["Workspaces"]
+            W1["FIN-QuarterlyFinancials-Gold-Dev"]
+            W2["FIN-QuarterlyFinancials-Gold-Prod"]
+            W3["MKT-CampaignAnalytics-Gold-Dev"]
+            W4["MKT-CampaignAnalytics-Gold-Prod"]
+            W5["ENG-DataPlatform-Bronze-Dev"]
+            W6["ENG-DataPlatform-Bronze-Prod"]
+        end
+    end
+
+    AP -->|"delegates settings"| Domains
+    CD -->|"compute for"| W1
+    CD -->|"compute for"| W3
+    CD -->|"compute for"| W5
+    CP -->|"compute for"| W2
+    CP -->|"compute for"| W4
+    CP -->|"compute for"| W6
+    D1 -->|"assigned"| W1
+    D1 -->|"assigned"| W2
+    D2 -->|"assigned"| W3
+    D2 -->|"assigned"| W4
+    D3 -->|"assigned"| W5
+    D3 -->|"assigned"| W6
+
+    classDef tenant fill:#0F1B33,stroke:#0891B2,color:#fff
+    classDef capacity fill:#1B2A4A,stroke:#0891B2,color:#fff
+    classDef domain fill:#0891B2,stroke:#065A82,color:#fff
+    classDef subdomain fill:#0E7490,stroke:#065A82,color:#fff
+    classDef workspace fill:#14B8A6,stroke:#0D9488,color:#fff
+
+    class AP tenant
+    class CD,CT,CP capacity
+    class D1,D2,D3 domain
+    class SD1A,SD1B,SD2A,SD2B,SD3A,SD3B subdomain
+    class W1,W2,W3,W4,W5,W6 workspace

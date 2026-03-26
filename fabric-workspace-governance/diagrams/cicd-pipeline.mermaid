@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant GA as GitHub Actions
+    participant TF as Terraform
+    participant Fabric as Microsoft Fabric
+    participant State as Azure Blob (State)
+
+    Note over Dev,State: Pull Request Flow (Plan)
+    Dev->>GH: Push branch, open PR
+    GH->>GA: Trigger plan workflow
+    GA->>GA: az login (OIDC)
+    GA->>TF: terraform init
+    TF->>State: Download state
+    GA->>TF: terraform plan
+    TF->>Fabric: Read current config (API)
+    TF-->>GA: Plan output (changes detected)
+    GA->>GH: Post plan as PR comment
+
+    Note over Dev,State: Review & Approval
+    Dev->>GH: Request review
+    GH-->>Dev: Reviewer approves PR
+
+    Note over Dev,State: Merge Flow (Apply)
+    Dev->>GH: Merge PR to main
+    GH->>GA: Trigger apply workflow
+    GA->>GA: az login (OIDC)
+    GA->>TF: terraform init
+    TF->>State: Download state
+    GA->>TF: terraform apply -auto-approve
+    TF->>Fabric: Create/update resources (API)
+    TF->>State: Upload updated state
+    TF-->>GA: Apply complete
+
+    Note over Dev,State: Post-Apply Verification
+    GA->>TF: terraform plan -detailed-exitcode
+    TF-->>GA: Exit code 0 (no drift)
+    GA->>GH: Status: success

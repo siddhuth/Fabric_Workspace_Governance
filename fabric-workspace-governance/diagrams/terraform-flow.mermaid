@@ -1,0 +1,48 @@
+graph LR
+    subgraph Modules["Reusable Modules"]
+        MC["modules/capacity<br/>─────────────<br/>data fabric_capacity"]
+        MD["modules/domain<br/>─────────────<br/>fabric_domain<br/>fabric_domain (subdomains)<br/>fabric_domain_role_assignment"]
+        MW["modules/workspace<br/>─────────────<br/>fabric_workspace<br/>fabric_workspace_role_assignment<br/>fabric_domain_workspace_assignment<br/>fabric_workspace_git"]
+    end
+
+    subgraph Environments["Environment Roots"]
+        ED["environments/dev<br/>main.tf"]
+        ET["environments/test<br/>main.tf"]
+        EP["environments/prod<br/>main.tf"]
+    end
+
+    subgraph State["Remote State (Azure Blob)"]
+        SD["fabric-dev.tfstate"]
+        ST["fabric-test.tfstate"]
+        SP["fabric-prod.tfstate"]
+    end
+
+    ED -->|"source"| MC
+    ED -->|"source"| MD
+    ED -->|"source"| MW
+    ET -->|"source"| MC
+    ET -->|"source"| MD
+    ET -->|"source"| MW
+    EP -->|"source"| MC
+    EP -->|"source"| MD
+    EP -->|"source"| MW
+
+    ED -->|"state"| SD
+    ET -->|"state"| ST
+    EP -->|"state"| SP
+
+    subgraph Validation["Naming Enforcement"]
+        NV["policies/naming_validation.tf<br/>─────────────<br/>Regex pattern matching<br/>Valid domain prefixes<br/>Valid layers & environments"]
+    end
+
+    MW -.->|"validates display_name"| NV
+
+    classDef module fill:#0891B2,stroke:#065A82,color:#fff
+    classDef env fill:#1B2A4A,stroke:#0891B2,color:#fff
+    classDef state fill:#14B8A6,stroke:#0D9488,color:#fff
+    classDef policy fill:#F59E0B,stroke:#D97706,color:#000
+
+    class MC,MD,MW module
+    class ED,ET,EP env
+    class SD,ST,SP state
+    class NV policy
